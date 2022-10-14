@@ -40,13 +40,14 @@ ps = [Γ; Ω; Δ; ν]
 p0 = [Γ_; Ω_; Δ_; ν_]
 
 # Initial state
-u0 = zeros(ComplexF64, length(eqs))</code></pre><p>Finally, we calculate and plot the time evolution.</p><pre><code class="language-julia">prob = ODEProblem(sys,u0,(0.0, 2tp+tf), ps.=&gt;p0)
+u0 = zeros(ComplexF64, length(eqs))</code></pre><p>Finally, we calculate and plot the time evolution.</p><pre><code class="language-">prob = ODEProblem(sys,u0,(0.0, 2tp+tf), ps.=&gt;p0)
 sol = solve(prob,Tsit5(),maxiters=1e7)
 
 # Plot time evolution
 t = sol.t
 s22 = real.(sol[σ(2,2)])
-plot(t, s22, xlabel=&quot;tΓ&quot;, ylabel=&quot;⟨σ22⟩&quot;, legend=false, size=(600,300))</code></pre><p><img src="../timeevolution_ramsey.svg" alt="svg"/></p><p>Scanning over the detuning for the excited state population leads to the well-known Ramsey fringes.</p><pre><code class="language-julia">Δ_ls = [-2000:4:2000;]Γ_
+plot(t, s22, xlabel=&quot;tΓ&quot;, ylabel=&quot;⟨σ22⟩&quot;, legend=false, size=(600,300))
+savefig(&quot;timeevolution_ramsey.svg&quot;) # hide</code></pre><p><img src="timeevolution_ramsey.svg" alt="svg"/></p><p>Scanning over the detuning for the excited state population leads to the well-known Ramsey fringes.</p><pre><code class="language-">Δ_ls = [-2000:4:2000;]Γ_
 s22_ls = zeros(length(Δ_ls))
 
 for i=1:length(Δ_ls)
@@ -55,4 +56,5 @@ for i=1:length(Δ_ls)
     s22_ls[i] = real.(sol_i[σ(2,2)])[end]
 end
 
-plot(Δ_ls, s22_ls, xlabel=&quot;Δ/Γ&quot;, ylabel=&quot;⟨σ22⟩&quot;, legend=false, size=(600,300))</code></pre><p><img src="../scan_ramsey.svg" alt="svg"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../cavity_antiresonance/">« Cavity Antiresonance</a><a class="docs-footer-nextpage" href="../superradiant_laser_indexed/">Superradiant Laser using Symbolic Summations »</a><div class="flexbox-break"></div><p class="footer-message"><a href="https://github.com/qojulia/QuantumCumulants.jl"><strong>Back to GitHub</strong></a></p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 14 October 2022 06:37">Friday 14 October 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(Δ_ls, s22_ls, xlabel=&quot;Δ/Γ&quot;, ylabel=&quot;⟨σ22⟩&quot;, legend=false, size=(600,300))
+savefig(&quot;scan_ramsey.svg&quot;) # hide</code></pre><p><img src="scan_ramsey.svg" alt="svg"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../cavity_antiresonance/">« Cavity Antiresonance</a><a class="docs-footer-nextpage" href="../superradiant_laser_indexed/">Superradiant Laser using Symbolic Summations »</a><div class="flexbox-break"></div><p class="footer-message"><a href="https://github.com/qojulia/QuantumCumulants.jl"><strong>Back to GitHub</strong></a></p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 14 October 2022 14:42">Friday 14 October 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
