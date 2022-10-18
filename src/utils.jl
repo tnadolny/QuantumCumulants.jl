@@ -366,6 +366,7 @@ function to_numeric(op::QSym, b::QuantumOpticsBase.CompositeBasis; kwargs...)
     return QuantumOpticsBase.embed(b, aon, op_num)
 end
 
+
 # Symbolic expressions
 function to_numeric(op::QTerm, b::QuantumOpticsBase.Basis; kwargs...)
     f = SymbolicUtils.operation(op)
@@ -379,6 +380,23 @@ function to_numeric(x::Number, b::QuantumOpticsBase.Basis; kwargs...)
     return op
 end
 
+# LazyTensor for product state
+to_numeric_lazy(op::QNumber, state; kwargs...) = to_numeric_lazy(op, QuantumOpticsBase.basis(state); kwargs...)
+function to_numeric_lazy(op::QSym, b::QuantumOpticsBase.CompositeBasis; kwargs...)
+    check_basis_match(op.hilbert, b)
+    aon = acts_on(op)
+    op_num = _to_numeric(op, b.bases[aon]; kwargs...)
+    return QuantumOpticsBase.LazyTensor(b, aon, Tuple([op_num]))
+end
+
+function to_numeric_lazy(op::QTerm, b::QuantumOpticsBase.CompositeBasis; kwargs...)
+    @assert SymbolicUtils.operation(op) == *
+    aon = acts_on(op)
+    args = SymbolicUtils.arguments(op)[2:end] # first element is numeric factor
+    [check_basis_match(arg.hilbert, b) for arg in args]
+    op_num = [_to_numeric(args[i], b.bases[aon[i]]; kwargs...) for i=1:length(aon)]
+    return QuantumOpticsBase.LazyTensor(b, aon, Tuple(op_num))
+end
 
 """
     numeric_average(avg::Average, state; level_map = nothing)
@@ -398,6 +416,11 @@ to_numeric(op::QNumber, state; kwargs...) = to_numeric(op, QuantumOpticsBase.bas
 
 function numeric_average(op::QNumber, state; kwargs...)
     op_num = to_numeric(op, state; kwargs...)
+    return QuantumOpticsBase.expect(op_num, state)
+end
+
+function numeric_average(op::QNumber, state::QuantumOpticsBase.LazyTensor; kwargs...)
+    op_num = to_numeric_lazy(op, state; kwargs...)
     return QuantumOpticsBase.expect(op_num, state)
 end
 
