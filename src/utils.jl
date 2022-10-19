@@ -419,10 +419,11 @@ function numeric_average(op::QNumber, state; kwargs...)
     return QuantumOpticsBase.expect(op_num, state)
 end
 
-function numeric_average(op::QNumber, state::QuantumOpticsBase.LazyTensor; kwargs...)
+function numeric_average(op::QNumber, state::Union{QuantumOpticsBase.LazyTensor,QuantumOpticsBase.LazyKet}; kwargs...)
     op_num = to_numeric_lazy(op, state; kwargs...)
     return QuantumOpticsBase.expect(op_num, state)
 end
+
 
 """
     initial_values(eqs::MeanfieldEquations, state; level_map = nothing)

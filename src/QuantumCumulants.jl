@@ -26,11 +26,11 @@ export HilbertSpace, ProductSpace, ⊗, tensor,
         CNumber, Parameter, @cnumbers, cnumbers,
         Average, average, cumulant_expansion, get_order, cumulant,
         find_missing, complete, complete!, find_operators, fundamental_operators,
-            unique_ops, unique_ops!, to_numeric, numeric_average, initial_values,
+            unique_ops, unique_ops!, to_numeric, numeric_average, initial_values, to_numeric_lazy,
         CorrelationFunction, Spectrum, correlation_u0, correlation_p0,
         ClusterSpace,
         scale,
-        transition_superscript, 
+        transition_superscript,
         Index, reorder, IndexedOperator, IndexedSingleSum, IndexedVariable, DoubleIndexedVariable,
         IndexedDoubleSum, indexed_complete, IndexedCorrelationFunction,
         scaleME, evalME, indexed_complete!, indexed_meanfield, subst_reds, AvgSums, plotME,
@@ -39,7 +39,7 @@ export HilbertSpace, ProductSpace, ⊗, tensor,
 
 const NO_METADATA = SymbolicUtils.NO_METADATA
 
-source_metadata(source, name) = 
+source_metadata(source, name) =
     Base.ImmutableDict{DataType, Any}(Symbolics.VariableSource, (source, name))
 
 include("hilbertspace.jl")

@@ -117,4 +117,43 @@ diff = (2*create(bfock)+2*destroy(bfock)) - to_numeric((2*(a)+2*(a')), bfock)
 @test isequal(to_numeric(2*a, bfock),2*to_numeric(a, bfock))
 @test iszero(to_numeric(2*a, bfock) - 2*to_numeric(a, bfock))
 
+# test LazyKet for initial product state
+h1 = FockSpace(:fock1)
+h2 = FockSpace(:fock2)
+h3 = NLevelSpace(:atom,3)
+h = h1 ⊗ h2 ⊗ h3
+
+@qnumbers a1::Destroy(h,1) a2::Destroy(h,2)
+σ(i,j) = Transition(h, :σ, i, j)
+
+b1 = FockBasis(200)
+b2 = FockBasis(250)
+b3 = NLevelBasis(3)
+b = b1 ⊗ b2 ⊗ b3
+
+a1a2n = to_numeric_lazy(a1*a2,b)
+a1n = to_numeric_lazy(a1,b)
+a2n = to_numeric_lazy(a2,b)
+
+ψ1 = coherentstate(b1, 2.0)
+ψ2 = coherentstate(b2, 3.0)
+# ψ1_ = coherentstate(b1, 5)
+# ψ2_ = coherentstate(b2, 6)
+ψ3 = nlevelstate(b3,2)
+ψ = LazyKet(b, (ψ1, ψ2, ψ3))
+
+# ψ12 = ψ1⊗ψ2 + ψ1_⊗ψ2_
+# ψ_ = LazyKet(b, (ψ12, ψ3))
+
+a1_ = numeric_average(a1,ψ)
+a2_ = numeric_average(a2,ψ)
+s22_ = numeric_average(σ(2,2),ψ)
+a1_a2_ = numeric_average(a1*a2,ψ)
+
+@test a1_a2_ == a1_*a2_
+@test s22_ == 1.0
+
+### test initial condition ###
+
+
 end # testset
