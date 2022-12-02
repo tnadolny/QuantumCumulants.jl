@@ -27,12 +27,10 @@ H = Δ*Σ(σ(2,2,j),j) + Σ(δ(i)*b(i)&#39;b(i),i) +
 J = [a, b(i), σ(1,2,j), σ(2,1,j), σ(2,2,j)]
 rates = [κ, κf, Γ, R, ν]</code></pre><p>We derive the equation for <span>$\langle a^\dagger a \rangle$</span> and complete the system automatically in second order.</p><pre><code class="language-julia">eqs = meanfield(a&#39;a,H,J;rates=rates,order=2)</code></pre><p class="math-container">\[\begin{align}
 \frac{d}{dt} \langle a^\dagger  a\rangle  =&amp; 1 i \underset{i}{\overset{M}{\sum}} gf  \langle a  {b}_{i}^\dagger\rangle  -1 i \underset{i}{\overset{M}{\sum}} gf  \langle a^\dagger  {b}_{i}\rangle  + 1 i \underset{j}{\overset{N}{\sum}} g  \langle a  {\sigma}_{j}^{{21}}\rangle  -1 i \underset{j}{\overset{N}{\sum}} g  \langle a^\dagger  {\sigma}_{j}^{{12}}\rangle  -1.0 \kappa \langle a^\dagger  a\rangle
-\end{align}\]</p><pre><code class="language-">eqs_c = complete(eqs);
-nothing # hide</code></pre><p>Now we assume that all atoms behave identically, but we want to obtain the equations for 20 different filter cavities. To this end we <span>$\texttt{scale}$</span> the Hilbert space of the atoms and <span>$\texttt{evaluate}$</span> the filter cavities. Specifying the Hilbert space is done with the kwarg <span>$\texttt{h}$</span>, which can either be the specific Hilbert space or its acts-on number. Evaluating the filter cavities requires a numeric upper bound for the used <span>$\texttt{Index}$</span>, we provide this with a dictionary on the kwarg <span>$\texttt{limits}$</span>.</p><pre><code class="language-">M_ = 20
+\end{align}\]</p><pre><code class="language-julia">eqs_c = complete(eqs);</code></pre><p>Now we assume that all atoms behave identically, but we want to obtain the equations for 20 different filter cavities. To this end we <span>$\texttt{scale}$</span> the Hilbert space of the atoms and <span>$\texttt{evaluate}$</span> the filter cavities. Specifying the Hilbert space is done with the kwarg <span>$\texttt{h}$</span>, which can either be the specific Hilbert space or its acts-on number. Evaluating the filter cavities requires a numeric upper bound for the used <span>$\texttt{Index}$</span>, we provide this with a dictionary on the kwarg <span>$\texttt{limits}$</span>.</p><pre><code class="language-julia">M_ = 20
 eqs_sc = scale(eqs_c;h=[ha]) #h=[3]
 eqs_eval = evaluate(eqs_sc; limits=Dict(M=&gt;M_)) #h=[hf]
-println(&quot;Number of eqs.: $(length(eqs_eval))&quot;)</code></pre><p>To calculate the dynamics of the system we create a system of ordinary differential equations, which can be used by <a href="https://diffeq.sciml.ai/stable/">DifferentialEquations.jl</a>. Finally we need to define the numerical parameters and the initial state of the system.</p><pre><code class="language-">@named sys = ODESystem(eqs_eval)
-nothing # hide</code></pre><pre><code class="language-"># Initial state
+println(&quot;Number of eqs.: $(length(eqs_eval))&quot;)</code></pre><pre class="documenter-example-output">Number of eqs.: 552</pre><p>To calculate the dynamics of the system we create a system of ordinary differential equations, which can be used by <a href="https://diffeq.sciml.ai/stable/">DifferentialEquations.jl</a>. Finally we need to define the numerical parameters and the initial state of the system.</p><pre><code class="language-julia">@named sys = ODESystem(eqs_eval)</code></pre><pre><code class="language-julia"># Initial state
 u0 = zeros(ComplexF64, length(eqs_eval))
 
 # System parameters
@@ -51,15 +49,13 @@ gf_ = 0.1Γ_
 ps = [Γ, κ, g, κf, gf, R, [δ(i) for i=1:M_]..., Δ, ν, N]
 p0 = [Γ_, κ_, g_, κf_, gf_, R_, δ_ls..., Δ_, ν_, N_]
 
-prob = ODEProblem(sys,u0,(0.0, 10.0/κf_), ps.=&gt;p0)
-nothing # hide</code></pre><pre><code class="language-"># Solve the numeric problem
+prob = ODEProblem(sys,u0,(0.0, 10.0/κf_), ps.=&gt;p0)</code></pre><pre><code class="language-julia"># Solve the numeric problem
 sol = solve(prob, Tsit5(); abstol=1e-10, reltol=1e-10, maxiters=1e7)
 
 t = sol.t
 n = abs.(sol[a&#39;a])
 n_b(i) =  abs.(sol[b(i)&#39;b(i)])
-n_f = [abs(sol[b(i)&#39;b(i)][end]) for i=1:M_] ./ (abs(sol[b(1)&#39;b(1)][end]))
-nothing # hide</code></pre><pre><code class="language-"># Plot results
+n_f = [abs(sol[b(i)&#39;b(i)][end]) for i=1:M_] ./ (abs(sol[b(1)&#39;b(1)][end]))</code></pre><pre><code class="language-julia"># Plot results
 p1 = plot(t, n_b(1), alpha=0.5, ylabel=&quot;⟨bᵢ⁺bᵢ⟩&quot;, legend=false)
 for i=2:M_
     plot!(t, n_b(i), alpha=0.5, legend=false)
@@ -67,5 +63,4 @@ end
 #p1 = plot!(twinx(), t, n, xlabel=&quot;tΓ&quot;, ylabel=&quot;⟨a⁺a⟩&quot;, legend=false)
 
 p2 = plot([-reverse(δ_ls);δ_ls], [reverse(n_f);n_f], xlabel=&quot;δ/Γ&quot;, ylabel=&quot;intensity&quot;, legend=false)
-plot(p1, p2, layout=(1,2), size=(700,300))
-savefig(&quot;filter_cavities_indexed.svg&quot;) # hide</code></pre><p><img src="filter_cavities_indexed.svg" alt="svg"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../cavity_antiresonance_indexed/">« Cavity Antiresonance</a><a class="docs-footer-nextpage" href="../superradiant-laser/">Superradiant Laser (outdated) »</a><div class="flexbox-break"></div><p class="footer-message"><a href="https://github.com/qojulia/QuantumCumulants.jl"><strong>Back to GitHub</strong></a></p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 2 December 2022 19:10">Friday 2 December 2022</span>. Using Julia version 1.8.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(p1, p2, layout=(1,2), size=(700,300))</code></pre><pre class="documenter-example-output">&quot;/home/runner/work/QuantumCumulants.jl/QuantumCumulants.jl/docs/build/examples/filter_cavities_indexed.svg&quot;</pre><p><img src="../filter_cavities_indexed.svg" alt="svg"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../cavity_antiresonance_indexed/">« Cavity Antiresonance</a><a class="docs-footer-nextpage" href="../superradiant-laser/">Superradiant Laser (outdated) »</a><div class="flexbox-break"></div><p class="footer-message"><a href="https://github.com/qojulia/QuantumCumulants.jl"><strong>Back to GitHub</strong></a></p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 2 December 2022 20:59">Friday 2 December 2022</span>. Using Julia version 1.8.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
