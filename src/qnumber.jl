@@ -230,7 +230,7 @@ SymbolicUtils.similarterm(::QAdd, ::typeof(+), args; metadata=NO_METADATA, exprh
 
 SymbolicUtils.metadata(q::QAdd) = q.metadata
 
-Base.adjoint(q::QAdd) = QAdd(map(adjoint, q.arguments))
+Base.adjoint(q::QAdd) = QAdd([q_arg isa QNumber ? adjoint(q_arg) : conj(q_arg) for q_arg in q.arguments])
 
 -(a::QNumber) = -1*a
 -(a,b::QNumber) = a + (-b)
